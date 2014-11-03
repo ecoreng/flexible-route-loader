@@ -42,9 +42,9 @@ $app->add(new RouteLoader($bag));
 $app->get('/', function () use ($yamlContent) {
     echo <<<EOT
     <h1>These Urls are loaded from the Yaml File:</h1>
-    <a href="test">Regular Url</a><br>
-    <a href="api/test">Group Url</a><br>
-    <a href="api/test2/test-sub">Nested Group Url</a><br>
+    <a href="index.php/test">Regular Url</a><br>
+    <a href="index.php/api/test">Group Url</a><br>
+    <a href="index.php/api/test2/test-sub">Nested Group Url</a><br>
     <br><br>
     (the current page is configured as a regular Slim anonymous function @ index.php)
     <h2>Yaml file content</h2>
