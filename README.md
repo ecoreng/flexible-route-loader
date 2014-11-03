@@ -142,5 +142,9 @@ $app->run();
 - Add Controller Class "nickname" replacement and processing (e.g.: @CoEx turns into \Company\Example\Controller)
 
 
-## Example ##
-Read a full example using Symfony Yaml Component @ ``example\index.php``
+## Examples ##
+Read a full example using Symfony Yaml Component @ ``example\yaml-example\index.php``
+Read a full example using a Json File @ ``example\json-example\index.php``
+
+## Contribute ##
+Pull Requests welcome, just add tests and adhere to PSR-2 coding style.

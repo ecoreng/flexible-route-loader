@@ -1,7 +1,7 @@
 <?php
 
 // Autoloader from composer
-require_once('../vendor/autoload.php');
+require_once('../../vendor/autoload.php');
 
 // require our controller (use an autoloader in the real setup)
 require_once('ExampleController.php');
@@ -10,24 +10,14 @@ require_once('ExampleController.php');
 use ecoreng\Route\RouteConfigBag as RouteBag;
 use ecoreng\Route\RouteLoaderMiddleware as RouteLoader;
 
-// Remember to add this to your composer:
-// ..
-// require: {
-//  ..
-//      "symfony/yaml": "2.5.6"
-//  ..
-// }
-use Symfony\Component\Yaml\Parser;
-
 // Instantiation of slim
 $slimConfig = ['debug' => true];
 $app = new \Slim\Slim($slimConfig);   // Slim 2.*
 // $app = new \Slim\App($slimConfig); // Slim 3.*
 
 // Instantiate a new Yaml Parser and load the routes.yml file as an array
-$yaml = new Parser();
-$yamlContent = file_get_contents('routes.yml');
-$config = $yaml->parse($yamlContent);
+$jsonContent = file_get_contents('routes.json');
+$config = json_decode($jsonContent, true);
 
 // Instantiate a new RouteConfigBag [this holds and validates our route config until it's time to load]
 $bag = new RouteBag;
@@ -39,18 +29,18 @@ $bag->setGroupConfig($config['groups']);
 $app->add(new RouteLoader($bag));
 
 // Define the generic landing page with links (optional)
-$app->get('/', function () use ($yamlContent) {
+$app->get('/', function () use ($jsonContent) {
     echo <<<EOT
-    <h1>These Urls are loaded from the Yaml File:</h1>
+    <h1>These Urls are loaded from the Json File:</h1>
     <a href="test">Regular Url</a><br>
     <a href="api/test">Group Url</a><br>
     <a href="api/test2/test-sub">Nested Group Url</a><br>
     <br><br>
     (the current page is configured as a regular Slim anonymous function @ index.php)
-    <h2>Yaml file content</h2>
+    <h2>Json file content</h2>
     <pre style="border:1px solid #000;border-radius:0.3em;margin:1em;
         background:#f0f0f0;padding:1em;display:inline-block;">
-{$yamlContent}
+{$jsonContent}
     </pre>
 EOT;
 });
