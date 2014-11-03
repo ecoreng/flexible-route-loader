@@ -1,6 +1,6 @@
 Flexible Route Loader Middleware
 =======================
-[![Build Status](https://travis-ci.org/ecoreng/FlexibleRouteLoader.svg)](https://travis-ci.org/ecoreng/FlexibleRouteLoader)[![SensioLabsInsight](https://insight.sensiolabs.com/projects/0f7d4aa7-f480-46dc-b9dc-a6191bfab8f5/mini.png)](https://insight.sensiolabs.com/projects/0f7d4aa7-f480-46dc-b9dc-a6191bfab8f5)
+[![Build Status](https://travis-ci.org/ecoreng/FlexibleRouteLoader.svg)](https://travis-ci.org/ecoreng/FlexibleRouteLoader) [![SensioLabsInsight](https://insight.sensiolabs.com/projects/0f7d4aa7-f480-46dc-b9dc-a6191bfab8f5/mini.png)](https://insight.sensiolabs.com/projects/0f7d4aa7-f480-46dc-b9dc-a6191bfab8f5)
 
 A route loader for Slim.
 
@@ -8,13 +8,15 @@ Notice that this is NOT a ROUTER, this just loads routes into the default Slim r
 
 It gives you the flexibility to configure your routes using an array. It supports
 Groups, Named Routes, Multiple or Single Http methods and conditions. At the moment
-is only possible to route using "Controller" classes, not anonymous functions.
+it'ss only possible to route using "Controller" classes, not anonymous functions.
 
 
 ## Why is this useful? ##
 
 Because you can manage your routes externally, as a separate file (i.e. Yaml, Json, PHP array, etc) without
 having to edit your front controller.
+
+Check the ``Examples`` Section at the bottom for example on how to load your routes from Yaml and/or Json Files
 
 
 ## Usage ##
@@ -63,6 +65,13 @@ $app->add(new ecoreng\Route\RouteLoaderMiddleware($bag));
 $app->run();
 
 ```
+This will set 3 routes:
+ - route named ``test-route``, accesible through ``/test``, proccessed by ``\\ExampleCo\\Api\\ApiController:test2Action``, via GET or POST
+ - route named ``pre-name_test``, accesible through ``/api/test``, processed by ``\\ExampleCo\\Api\\ApiController:test2Action``, via GET
+ - route named ``pre-name_test2_deep-route``, accesible through ``/api/client/:id``, processed by ``\\ExampleCo\\Api\\ApiController:getClientAction``, via GET or POST or PUT
+
+Notice the name inheritance from parent plus underscore in route group names
+
 
 ### Usage with Container ###
 
@@ -91,13 +100,8 @@ $app->add(new ecoreng\Route\RouteLoaderMiddleware('route_bag'));
 
 $app->run();
 ```
-
-This will set 3 routes:
- - route named ``test-route``, accesible through ``/test``, proccessed by ``\\ExampleCo\\Api\\ApiController:test2Action``, via GET or POST
- - route named ``pre-name_test``, accesible through ``/api/test``, processed by ``\\ExampleCo\\Api\\ApiController:test2Action``, via GET
- - route named ``pre-name_test2_deep-route``, accesible through ``/api/client/:id``, processed by ``\\ExampleCo\\Api\\ApiController:getClientAction``, via GET or POST or PUT
-
-Notice the name inheritance from parent plus underscore in route group names
+You can just pass the service name in the Middleware constructor and the route loader will retrieve the route bag from
+the container automatically.
 
 
 ## Known Issues ##
@@ -143,8 +147,8 @@ $app->run();
 
 
 ## Examples ##
-Read a full example using Symfony Yaml Component @ ``example\yaml-example\index.php``
-Read a full example using a Json File @ ``example\json-example\index.php``
+- Read a full example using Symfony Yaml Component @ ``example\yaml-example\index.php``
+- Read a full example using a Json File @ ``example\json-example\index.php``
 
 ## Contribute ##
-Pull Requests welcome, just add tests and adhere to PSR-2 coding style.
+Pull Requests welcome, add some tests if necessary and adhere to PSR-2 coding style.
