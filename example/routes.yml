@@ -1,0 +1,21 @@
+routes:
+    test_route26:
+        controller:  \ExampleCo\Example\ExampleController:testAction
+        route: /test
+        methods: GET
+
+groups:
+    api:
+        route: /api
+        group:
+            test:
+                route: /test
+                methods:    GET|POST
+                controller: \ExampleCo\Example\ExampleController:getOrPostTestAction
+            test2:
+                route: /test2
+                group:
+                    test_sub:
+                        route:  /test-sub
+                        methods:    GET
+                        controller: \ExampleCo\Example\ExampleController:subAction
