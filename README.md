@@ -1,5 +1,6 @@
 Flexible Route Loader Middleware
 =======================
+[![Build Status](https://travis-ci.org/ecoreng/FlexibleRouteLoader.svg)](https://travis-ci.org/ecoreng/FlexibleRouteLoader)[![SensioLabsInsight](https://insight.sensiolabs.com/projects/0f7d4aa7-f480-46dc-b9dc-a6191bfab8f5/mini.png)](https://insight.sensiolabs.com/projects/0f7d4aa7-f480-46dc-b9dc-a6191bfab8f5)
 
 A route loader for Slim.
 
@@ -92,9 +93,9 @@ $app->run();
 ```
 
 This will set 3 routes:
-- route named "test-route", accesible through "/test", proccessed by "\\ExampleCo\\Api\\ApiController:test2Action", via GET or POST
-- route named "pre-name_test", accesible through "/api/test", processed by "\\ExampleCo\\Api\\ApiController:test2Action", via GET
-- route named "pre-name_test2_deep-route", accesible through "/api/client/:id", processed by "\\ExampleCo\\Api\\ApiController:getClientAction", via GET or POST or PUT
+ - route named ``test-route``, accesible through ``/test``, proccessed by ``\\ExampleCo\\Api\\ApiController:test2Action``, via GET or POST
+ - route named ``pre-name_test``, accesible through ``/api/test``, processed by ``\\ExampleCo\\Api\\ApiController:test2Action``, via GET
+ - route named ``pre-name_test2_deep-route``, accesible through ``/api/client/:id``, processed by ``\\ExampleCo\\Api\\ApiController:getClientAction``, via GET or POST or PUT
 
 Notice the name inheritance from parent plus underscore in route group names
 

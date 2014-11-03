@@ -159,8 +159,6 @@ class RouteLoaderMiddleware extends \Slim\Middleware
     /**
      * Sets default parameters for a route config entry and maps that route
      *
-     * @todo handle route middleware
-     *
      * @param array $config
      * @param string $name
      * @throws \BadMethodCallException
