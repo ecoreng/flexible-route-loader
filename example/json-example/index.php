@@ -5,13 +5,8 @@ $closureMiddleware = function ($route) {
         echo '&nbsp;&nbsp;analizing route: ' . $route->getName() . '<br>';
         echo '}<br>';
 };
+require_once('middleware.php');
 
-// Route Middleware as Function
-function test ($route) {
-        echo '<br>Route Middleware in action: test (function) { <br>';
-        echo '&nbsp;&nbsp;analizing route: ' . $route->getName() . '<br>';
-        echo '}<br>';
-}
 // Autoloader from composer
 require_once('../../vendor/autoload.php');
 

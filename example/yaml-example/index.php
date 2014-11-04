@@ -9,17 +9,7 @@ $closureMiddleware = function ($test3, $test4) {
         echo '}<br>';
     };
 };
-
-// Route Middleware as Function
-function test ($test7, $test8) {
-    return function ($route) use ($test7, $test8) {
-        echo '<br>Route Middleware in action: test (function) { <br>';
-        echo '&nbsp;&nbsp;analizing route: ' . $route->getName() . '<br>';
-        echo '&nbsp;&nbsp;$test7: ' . $test7 . '<br>';
-        echo '&nbsp;&nbsp;$test8: ' . $test8 . '<br>';
-        echo '}<br>';
-    };
-}
+require_once('middleware.php');
 
 // Autoloader from composer
 require_once('../../vendor/autoload.php');

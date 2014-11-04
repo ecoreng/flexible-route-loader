@@ -4,27 +4,6 @@ namespace ecoreng\Test\Route;
 
 use \ecoreng\Route\RouteLoaderMiddleware as RLmw;
 
-$closureWithParams = function ($param4) {
-    return function ($route) use ($param4) {
-        
-    };
-};
-$closureNoParams = function ($route) {
-    
-};
-
-function functionWithParams($param5)
-{
-    return function ($route) use ($param5) {
-        
-    };
-}
-
-function functionNoParams($route)
-{
-    
-}
-
 class RouteLoaderMiddlewareTest extends \PHPUnit_Framework_TestCase
 {
 
@@ -271,10 +250,12 @@ class RouteLoaderMiddlewareTest extends \PHPUnit_Framework_TestCase
         $this->assertArrayHasKey('placeholder1', $nr->getConditions());
         $this->assertArrayHasKey('placeholder2', $nr->getConditions());
         $this->assertEquals(
-                $this->validRouteConfig['test']['conditions']['placeholder1'], $nr->getConditions()['placeholder1']
+            $this->validRouteConfig['test']['conditions']['placeholder1'],
+            $nr->getConditions()['placeholder1']
         );
         $this->assertEquals(
-                $this->validRouteConfig['test']['conditions']['placeholder2'], $nr->getConditions()['placeholder2']
+            $this->validRouteConfig['test']['conditions']['placeholder2'],
+            $nr->getConditions()['placeholder2']
         );
         $this->assertEquals(true, in_array('GET', $nr->getHttpMethods()));
         $this->assertEquals(true, in_array('POST', $nr->getHttpMethods()));
@@ -288,7 +269,7 @@ class RouteLoaderMiddlewareTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals('ecoreng\Test\Route\{closure}', $mwRef->getName());
 
         $mwRef = new \ReflectionFunction($mw[2]);
-        $this->assertEquals('ecoreng\Test\Route\{closure}', $mwRef->getName());
+        $this->assertEquals('{closure}', $mwRef->getName());
 
         $mwRef = new \ReflectionFunction($mw[3]);
         $this->assertEquals('ecoreng\Test\Route\{closure}', $mwRef->getName());
@@ -300,7 +281,7 @@ class RouteLoaderMiddlewareTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals('ecoreng\Test\Route\TestRouteMiddleware::staticTest', $mw[5]);
 
         $mwRef = new \ReflectionFunction($mw[6]);
-        $this->assertEquals('ecoreng\Test\Route\{closure}', $mwRef->getName());
+        $this->assertEquals('{closure}', $mwRef->getName());
 
         $this->assertEquals('\ecoreng\Test\Route\functionNoParams', $mw[7]);
 
@@ -310,10 +291,12 @@ class RouteLoaderMiddlewareTest extends \PHPUnit_Framework_TestCase
         $this->assertArrayHasKey('placeholder1', $nr->getConditions());
         $this->assertArrayHasKey('placeholder2', $nr->getConditions());
         $this->assertEquals(
-                $this->validRouteConfig['test2']['conditions']['placeholder1'], $nr->getConditions()['placeholder1']
+            $this->validRouteConfig['test2']['conditions']['placeholder1'],
+            $nr->getConditions()['placeholder1']
         );
         $this->assertEquals(
-                $this->validRouteConfig['test2']['conditions']['placeholder2'], $nr->getConditions()['placeholder2']
+            $this->validRouteConfig['test2']['conditions']['placeholder2'],
+            $nr->getConditions()['placeholder2']
         );
         $this->assertEquals(true, in_array('GET', $nr->getHttpMethods()));
 
@@ -323,10 +306,12 @@ class RouteLoaderMiddlewareTest extends \PHPUnit_Framework_TestCase
         $this->assertArrayHasKey('placeholder1', $nr->getConditions());
         $this->assertArrayHasKey('placeholder2', $nr->getConditions());
         $this->assertEquals(
-                $this->validGroupConfig['api']['group']['test-group']['conditions']['placeholder1'], $nr->getConditions()['placeholder1']
+            $this->validGroupConfig['api']['group']['test-group']['conditions']['placeholder1'],
+            $nr->getConditions()['placeholder1']
         );
         $this->assertEquals(
-                $this->validGroupConfig['api']['group']['test-group']['conditions']['placeholder2'], $nr->getConditions()['placeholder2']
+            $this->validGroupConfig['api']['group']['test-group']['conditions']['placeholder2'],
+            $nr->getConditions()['placeholder2']
         );
         $this->assertEquals(true, in_array('GET', $nr->getHttpMethods()));
 
@@ -341,10 +326,12 @@ class RouteLoaderMiddlewareTest extends \PHPUnit_Framework_TestCase
         $this->assertArrayHasKey('placeholder1', $nr->getConditions());
         $this->assertArrayHasKey('placeholder2', $nr->getConditions());
         $this->assertEquals(
-                $this->validGroupConfig['api2']['group']['test-group3']['conditions']['placeholder1'], $nr->getConditions()['placeholder1']
+            $this->validGroupConfig['api2']['group']['test-group3']['conditions']['placeholder1'],
+            $nr->getConditions()['placeholder1']
         );
         $this->assertEquals(
-                $this->validGroupConfig['api2']['group']['test-group3']['conditions']['placeholder2'], $nr->getConditions()['placeholder2']
+            $this->validGroupConfig['api2']['group']['test-group3']['conditions']['placeholder2'],
+            $nr->getConditions()['placeholder2']
         );
         $this->assertEquals(true, in_array('GET', $nr->getHttpMethods()));
         $this->assertEquals(true, in_array('POST', $nr->getHttpMethods()));

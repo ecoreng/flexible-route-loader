@@ -95,7 +95,7 @@ class RouteLoaderMiddleware extends \Slim\Middleware
 
             if (!$this->bagReady()) {
                 throw new \InvalidArgumentException(
-                'Route config bag could not be retrieved from container using service name: ' . $bagServiceName
+                    'Route config bag could not be retrieved from container using service name: ' . $bagServiceName
                 );
             }
         }
@@ -155,7 +155,7 @@ class RouteLoaderMiddleware extends \Slim\Middleware
                 ->name($name)
                 ->conditions($conditions);
         call_user_func_array(array($route, 'via'), $methods);
-        if(count($middleware) > 0) {
+        if (count($middleware) > 0) {
             $route->setMiddleware($middleware);
         }
     }
@@ -239,7 +239,7 @@ class RouteLoaderMiddleware extends \Slim\Middleware
                 $controller = $config['class'];
                 if (strpos($controller, '::') !== false) {
                     // Static
-                    if (!is_callable($controller)){
+                    if (!is_callable($controller)) {
                         throw new \Exception('Function ' . $controller . ' is not callable');
                     }
                     if (count($params) > 0) {
@@ -250,7 +250,7 @@ class RouteLoaderMiddleware extends \Slim\Middleware
                 } elseif (strpos($controller, ':') !== false) {
                     // Regular method
                     $cparams = explode(":", $controller);
-                     if (!is_callable([(new $cparams[0]), $cparams[1]])){
+                    if (!is_callable([(new $cparams[0]), $cparams[1]])) {
                         throw new \Exception('Function ' . $controller . ' is not callable');
                     }
                     if (count($params) > 0) {
@@ -260,15 +260,15 @@ class RouteLoaderMiddleware extends \Slim\Middleware
                     }
                 } else {
                     throw new \InvalidArgumentException(
-                    'Controller ' . $controller . ' does not have a valid action; :: or : are '
-                    . 'required to delimit the method'
+                        'Controller ' . $controller . ' does not have a valid action; :: or : are '
+                        . 'required to delimit the method'
                     );
                 }
                 continue;
             }
             if (array_key_exists('closure', $config)) {
                 global $$config['closure'];
-                if (!is_callable($$config['closure'])){
+                if (!is_callable($$config['closure'])) {
                     throw new \Exception('Function ' . $config['closure'] . ' is not callable');
                 }
                 if (count($params) > 0) {
@@ -280,7 +280,7 @@ class RouteLoaderMiddleware extends \Slim\Middleware
             }
             
             if (array_key_exists('function', $config)) {
-                if (!is_callable($config['function'])){
+                if (!is_callable($config['function'])) {
                     throw new \Exception('Function ' . $config['function'] . ' is not callable');
                 }
                 if (count($params) > 0) {
@@ -295,5 +295,4 @@ class RouteLoaderMiddleware extends \Slim\Middleware
         }
         return $readyMw;
     }
-
 }
