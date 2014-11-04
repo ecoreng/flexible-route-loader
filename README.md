@@ -142,13 +142,14 @@ $app->run();
 ```
 
 ## To Do ##
-- Add Support for Route Middleware
 - Add Controller Class "nickname" replacement and processing (e.g.: @CoEx turns into \Company\Example\Controller)
 
 
 ## Examples ##
-- Read a full example using Symfony Yaml Component @ ``example\yaml-example\index.php``
-- Read a full example using a Json File @ ``example\json-example\index.php``
+Be sure to check out both example as they have set up route middleware differently:
+
+- Read a full example using Symfony Yaml Component @ ``example\yaml-example\index.php``; this example uses Route Middleware directly (that only take one parameter (``Route`` Object));
+- Read a full example using a Json File @ ``example\json-example\index.php``; this example uses Route Middleware that take parameters on call and return anonymous functions that take one parameter (``Route`` Object) to be called later
 
 ## Contribute ##
 Pull Requests welcome, add some tests if necessary and adhere to PSR-2 coding style.

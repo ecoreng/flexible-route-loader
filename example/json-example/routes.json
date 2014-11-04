@@ -3,7 +3,21 @@
          "test_route26": {
             "controller": "\\ExampleCo\\Example\\ExampleController:testAction",
             "route": "/test",
-            "methods": "GET"
+            "methods": "GET",
+            "middleware": {
+                "authentication": {
+                    "class": "\\ExampleCo\\Example\\ExampleRouteMiddleware:a12n"
+                },
+                "authorization": {
+                    "closure": "closureMiddleware"
+                },
+                "other": {
+                    "function": "test"
+                },
+                "other2":{
+                    "class": "\\ExampleCo\\Example\\ExampleRouteMiddleware::other"
+                }
+            }
          }
     },
     "groups": {

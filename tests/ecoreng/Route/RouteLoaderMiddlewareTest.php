@@ -4,6 +4,27 @@ namespace ecoreng\Test\Route;
 
 use \ecoreng\Route\RouteLoaderMiddleware as RLmw;
 
+$closureWithParams = function ($param4) {
+    return function ($route) use ($param4) {
+        
+    };
+};
+$closureNoParams = function ($route) {
+    
+};
+
+function functionWithParams($param5)
+{
+    return function ($route) use ($param5) {
+        
+    };
+}
+
+function functionNoParams($route)
+{
+    
+}
+
 class RouteLoaderMiddlewareTest extends \PHPUnit_Framework_TestCase
 {
 
@@ -20,7 +41,7 @@ class RouteLoaderMiddlewareTest extends \PHPUnit_Framework_TestCase
             $this->slimVersion = 2;
             $this->slimClassName = '\\Slim\\Slim';
         }
-        
+
         // Route Configs
 
         $this->validRouteConfig = [
@@ -31,6 +52,46 @@ class RouteLoaderMiddlewareTest extends \PHPUnit_Framework_TestCase
                 'conditions' => [
                     'placeholder1' => '(19|20)\d\d',
                     'placeholder2' => '(20)\d\d',
+                ],
+                'middleware' => [
+                    'test' => [
+                        'class' => 'ecoreng\\Test\\Route\\TestRouteMiddleware:testWithParams',
+                        'params' => [
+                            'foo' => 'bar',
+                            'param3' => 'zzz'
+                        ]
+                    ],
+                    'test2' => [
+                        'class' => 'ecoreng\\Test\\Route\\TestRouteMiddleware::staticTestWithParams',
+                        'params' => [
+                            'param1' => '1',
+                            'param2' => '2'
+                        ]
+                    ],
+                    'test3' => [
+                        'closure' => 'closureWithParams',
+                        'params' => [
+                            'param4' => 1
+                        ],
+                    ],
+                    'test4' => [
+                        'function' => '\\ecoreng\\Test\\Route\\functionWithParams', // namespaced function
+                        'params' => [
+                            'param5' => 2
+                        ]
+                    ],
+                    'test5' => [
+                        'class' => 'ecoreng\\Test\\Route\\TestRouteMiddleware:test'
+                    ],
+                    'test6' => [
+                        'class' => 'ecoreng\\Test\\Route\\TestRouteMiddleware::staticTest'
+                    ],
+                    'test7' => [
+                        'closure' => 'closureNoParams'
+                    ],
+                    'test8' => [
+                        'function' => '\\ecoreng\\Test\\Route\\functionNoParams', // namespaced function
+                    ]
                 ]
             ],
             'test2' => [
@@ -99,6 +160,69 @@ class RouteLoaderMiddlewareTest extends \PHPUnit_Framework_TestCase
             'testclassnickname' => '\\ecoreng\\Test\\Route\\NicknameHandler:handler1'
         ];
 
+        $this->invalidMiddlewareMissingCallable = [
+            'test' => [
+                'controller' => '\\Example\\Controller\\ExampleController:action',
+                'route' => '/sample-route',
+                'methods' => 'GET',
+                'middleware' => [
+                    'test' => []
+                ]
+            ]
+        ];
+        
+        $this->invalidMiddlewareSyntax1 = [
+            'test' => [
+                'controller' => '\\Example\\Controller\\ExampleController:action',
+                'route' => '/sample-route',
+                'methods' => 'GET',
+                'middleware' => [
+                    'test' => [
+                        'class' => '1invalid::_stuff'
+                    ]
+                ]
+            ]
+        ];
+        
+        $this->invalidMiddlewareSyntax2 = [
+            'test' => [
+                'controller' => '\\Example\\Controller\\ExampleController:action',
+                'route' => '/sample-route',
+                'methods' => 'GET',
+                'middleware' => [
+                    'test' => [
+                        'class' => '2invalid:_stuff'
+                    ]
+                ]
+            ]
+        ];
+        
+        $this->invalidMiddlewareClosure = [
+            'test' => [
+                'controller' => '\\Example\\Controller\\ExampleController:action',
+                'route' => '/sample-route',
+                'methods' => 'GET',
+                'middleware' => [
+                    'test' => [
+                        'closure' => 'nonexistent'
+                    ]
+                ]
+            ]
+        ];
+        
+        $this->invalidMiddlewareFunction = [
+            'test' => [
+                'controller' => '\\Example\\Controller\\ExampleController:action',
+                'route' => '/sample-route',
+                'methods' => 'GET',
+                'middleware' => [
+                    'test' => [
+                        'function' => 'nonexistent'
+                    ]
+                ]
+            ]
+        ];
+
         $this->validBag->setGroupConfig($this->validGroupConfig);
         $this->validBag->setRouteConfig($this->validRouteConfig);
         $this->validBag->setNicknames($this->validNicknamesConfig);
@@ -119,7 +243,7 @@ class RouteLoaderMiddlewareTest extends \PHPUnit_Framework_TestCase
     {
         $this->mw->setBag($this->validBag);
     }
-    
+
     public function getService($name)
     {
         if ($this->slimVersion == 3) {
@@ -128,7 +252,7 @@ class RouteLoaderMiddlewareTest extends \PHPUnit_Framework_TestCase
             return $this->app->{$name};
         }
     }
-    
+
     public function setService($name, $definition)
     {
         if ($this->slimVersion == 3) {
@@ -137,7 +261,7 @@ class RouteLoaderMiddlewareTest extends \PHPUnit_Framework_TestCase
             $this->app->container->singleton($name, $definition);
         }
     }
-    
+
     public function genericValidAsserts($router)
     {
         // Not testing controller or route because the Bag validates that already
@@ -147,69 +271,83 @@ class RouteLoaderMiddlewareTest extends \PHPUnit_Framework_TestCase
         $this->assertArrayHasKey('placeholder1', $nr->getConditions());
         $this->assertArrayHasKey('placeholder2', $nr->getConditions());
         $this->assertEquals(
-            $this->validRouteConfig['test']['conditions']['placeholder1'],
-            $nr->getConditions()['placeholder1']
+                $this->validRouteConfig['test']['conditions']['placeholder1'], $nr->getConditions()['placeholder1']
         );
         $this->assertEquals(
-            $this->validRouteConfig['test']['conditions']['placeholder2'],
-            $nr->getConditions()['placeholder2']
+                $this->validRouteConfig['test']['conditions']['placeholder2'], $nr->getConditions()['placeholder2']
         );
         $this->assertEquals(true, in_array('GET', $nr->getHttpMethods()));
         $this->assertEquals(true, in_array('POST', $nr->getHttpMethods()));
-        // to do: route middleware test
-        // var_dump($router->getNamedRoute('test')->getMiddleware());
-        
-        
+        $mw = $nr->getMiddleware();
+        $this->assertEquals(8, count($mw));
+
+        $mwRef = new \ReflectionFunction($mw[0]);
+        $this->assertEquals('ecoreng\Test\Route\{closure}', $mwRef->getName());
+
+        $mwRef = new \ReflectionFunction($mw[1]);
+        $this->assertEquals('ecoreng\Test\Route\{closure}', $mwRef->getName());
+
+        $mwRef = new \ReflectionFunction($mw[2]);
+        $this->assertEquals('ecoreng\Test\Route\{closure}', $mwRef->getName());
+
+        $mwRef = new \ReflectionFunction($mw[3]);
+        $this->assertEquals('ecoreng\Test\Route\{closure}', $mwRef->getName());
+
+        $this->assertEquals(true, is_array($mw[4]));
+        $this->assertInstanceOf('\ecoreng\Test\Route\TestRouteMiddleware', $mw[4][0]);
+        $this->assertEquals('test', $mw[4][1]);
+
+        $this->assertEquals('ecoreng\Test\Route\TestRouteMiddleware::staticTest', $mw[5]);
+
+        $mwRef = new \ReflectionFunction($mw[6]);
+        $this->assertEquals('ecoreng\Test\Route\{closure}', $mwRef->getName());
+
+        $this->assertEquals('\ecoreng\Test\Route\functionNoParams', $mw[7]);
+
+
         $this->assertEquals('/sample-route2/:placeholder1/:placeholder2', $router->urlFor('test2'));
         $nr = $router->getNamedRoute('test2');
         $this->assertArrayHasKey('placeholder1', $nr->getConditions());
         $this->assertArrayHasKey('placeholder2', $nr->getConditions());
         $this->assertEquals(
-            $this->validRouteConfig['test2']['conditions']['placeholder1'],
-            $nr->getConditions()['placeholder1']
+                $this->validRouteConfig['test2']['conditions']['placeholder1'], $nr->getConditions()['placeholder1']
         );
         $this->assertEquals(
-            $this->validRouteConfig['test2']['conditions']['placeholder2'],
-            $nr->getConditions()['placeholder2']
+                $this->validRouteConfig['test2']['conditions']['placeholder2'], $nr->getConditions()['placeholder2']
         );
         $this->assertEquals(true, in_array('GET', $nr->getHttpMethods()));
 
-        
+
         $this->assertEquals('/api/test/:placeholder1/:placeholder2', $router->urlFor('api_test-group'));
         $nr = $router->getNamedRoute('api_test-group');
         $this->assertArrayHasKey('placeholder1', $nr->getConditions());
         $this->assertArrayHasKey('placeholder2', $nr->getConditions());
         $this->assertEquals(
-            $this->validGroupConfig['api']['group']['test-group']['conditions']['placeholder1'],
-            $nr->getConditions()['placeholder1']
+                $this->validGroupConfig['api']['group']['test-group']['conditions']['placeholder1'], $nr->getConditions()['placeholder1']
         );
         $this->assertEquals(
-            $this->validGroupConfig['api']['group']['test-group']['conditions']['placeholder2'],
-            $nr->getConditions()['placeholder2']
+                $this->validGroupConfig['api']['group']['test-group']['conditions']['placeholder2'], $nr->getConditions()['placeholder2']
         );
         $this->assertEquals(true, in_array('GET', $nr->getHttpMethods()));
 
-        
+
         $this->assertEquals('/api/test2/sub', $router->urlFor('api_test-group2_test-sub'));
         $nr = $router->getNamedRoute('api_test-group2_test-sub');
         $this->assertEquals(true, in_array('POST', $nr->getHttpMethods()));
 
-        
+
         $this->assertEquals('/api2/test2/:placeholder1/:placeholder2', $router->urlFor('api2_test-group3'));
         $nr = $router->getNamedRoute('api2_test-group3');
         $this->assertArrayHasKey('placeholder1', $nr->getConditions());
         $this->assertArrayHasKey('placeholder2', $nr->getConditions());
         $this->assertEquals(
-            $this->validGroupConfig['api2']['group']['test-group3']['conditions']['placeholder1'],
-            $nr->getConditions()['placeholder1']
+                $this->validGroupConfig['api2']['group']['test-group3']['conditions']['placeholder1'], $nr->getConditions()['placeholder1']
         );
         $this->assertEquals(
-            $this->validGroupConfig['api2']['group']['test-group3']['conditions']['placeholder2'],
-            $nr->getConditions()['placeholder2']
+                $this->validGroupConfig['api2']['group']['test-group3']['conditions']['placeholder2'], $nr->getConditions()['placeholder2']
         );
         $this->assertEquals(true, in_array('GET', $nr->getHttpMethods()));
         $this->assertEquals(true, in_array('POST', $nr->getHttpMethods()));
-        
     }
 
     public function testConstructWithBag()
@@ -220,7 +358,7 @@ class RouteLoaderMiddlewareTest extends \PHPUnit_Framework_TestCase
         $router = $this->getService('router');
         $this->genericValidAsserts($router);
     }
-    
+
     public function testWithBagSetter()
     {
         $this->initMw();
@@ -233,18 +371,18 @@ class RouteLoaderMiddlewareTest extends \PHPUnit_Framework_TestCase
     public function testGetBagFromContainerWithDefaultName()
     {
         $this->initMw();
-        
+
         $this->setService('route_config_bag', function ($c = null) {
             return new \ecoreng\Route\RouteConfigBag;
         });
-        
+
         $bag = $this->getService('route_config_bag');
         $bag->setGroupConfig($this->validGroupConfig);
         $bag->setRouteConfig($this->validRouteConfig);
         $bag->setNicknames($this->validNicknamesConfig);
 
         $this->mw->call();
-        
+
         $router = $this->getService('router');
         $this->genericValidAsserts($router);
     }
@@ -281,7 +419,7 @@ class RouteLoaderMiddlewareTest extends \PHPUnit_Framework_TestCase
             $this->assertInstanceOf('\\InvalidArgumentException', $e);
         }
     }
-    
+
     public function testNotActingAsMiddleware()
     {
         $nmw = new RLmw($this->validBag, false);
@@ -291,5 +429,80 @@ class RouteLoaderMiddlewareTest extends \PHPUnit_Framework_TestCase
         $nmw->call();
         $router = $this->getService('router');
         $this->genericValidAsserts($router);
+    }
+
+    public function testInvalidMiddlewareMissingCallable()
+    {
+        $bag = new \ecoreng\Route\RouteConfigBag;
+        $bag->setRouteConfig($this->invalidMiddlewareMissingCallable);
+        $this->mw = new RLmw();
+        $this->app = new $this->slimClassName;
+        $this->mw->setApplication($this->app);
+        $this->mw->setNextMiddleware(new \ecoreng\Test\Route\NextTestMiddleware);
+        try {
+            $this->mw->call();
+        } catch (\Exception $e) {
+            $this->assertInstanceOf('\\InvalidArgumentException', $e);
+        }
+    }
+
+    public function testInvalidMiddlewareSyntax1()
+    {
+        $bag = new \ecoreng\Route\RouteConfigBag;
+        $bag->setRouteConfig($this->invalidMiddlewareSyntax1);
+        $this->mw = new RLmw();
+        $this->app = new $this->slimClassName;
+        $this->mw->setApplication($this->app);
+        $this->mw->setNextMiddleware(new \ecoreng\Test\Route\NextTestMiddleware);
+        try {
+            $this->mw->call();
+        } catch (\Exception $e) {
+            $this->assertInstanceOf('\\InvalidArgumentException', $e);
+        }
+    }
+    
+    public function testInvalidMiddlewareSyntax2()
+    {
+        $bag = new \ecoreng\Route\RouteConfigBag;
+        $bag->setRouteConfig($this->invalidMiddlewareSyntax2);
+        $this->mw = new RLmw();
+        $this->app = new $this->slimClassName;
+        $this->mw->setApplication($this->app);
+        $this->mw->setNextMiddleware(new \ecoreng\Test\Route\NextTestMiddleware);
+        try {
+            $this->mw->call();
+        } catch (\Exception $e) {
+            $this->assertInstanceOf('\\InvalidArgumentException', $e);
+        }
+    }
+    
+    public function testInvalidMiddlewareClosure()
+    {
+        $bag = new \ecoreng\Route\RouteConfigBag;
+        $bag->setRouteConfig($this->invalidMiddlewareClosure);
+        $this->mw = new RLmw();
+        $this->app = new $this->slimClassName;
+        $this->mw->setApplication($this->app);
+        $this->mw->setNextMiddleware(new \ecoreng\Test\Route\NextTestMiddleware);
+        try {
+            $this->mw->call();
+        } catch (\Exception $e) {
+            $this->assertInstanceOf('\\InvalidArgumentException', $e);
+        }
+    }
+
+    public function testInvalidMiddlewareFunction()
+    {
+        $bag = new \ecoreng\Route\RouteConfigBag;
+        $bag->setRouteConfig($this->invalidMiddlewareFunction);
+        $this->mw = new RLmw();
+        $this->app = new $this->slimClassName;
+        $this->mw->setApplication($this->app);
+        $this->mw->setNextMiddleware(new \ecoreng\Test\Route\NextTestMiddleware);
+        try {
+            $this->mw->call();
+        } catch (\Exception $e) {
+            $this->assertInstanceOf('\\InvalidArgumentException', $e);
+        }
     }
 }

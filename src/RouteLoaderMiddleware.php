@@ -95,7 +95,7 @@ class RouteLoaderMiddleware extends \Slim\Middleware
 
             if (!$this->bagReady()) {
                 throw new \InvalidArgumentException(
-                    'Route config bag could not be retrieved from container using service name: ' . $bagServiceName
+                'Route config bag could not be retrieved from container using service name: ' . $bagServiceName
                 );
             }
         }
@@ -147,13 +147,17 @@ class RouteLoaderMiddleware extends \Slim\Middleware
      * @param string $methods
      * @param string $conditions
      */
-    protected function mapRoute($route, $name, $controller = null, $methods = [], $conditions = [])
+    protected function mapRoute($route, $name, $controller = null, $methods = [], $conditions = [], $middleware = [])
     {
+        $middleware = self::prepareMiddleware($middleware);
         $route = $this->app
                 ->map($route, $controller)
                 ->name($name)
                 ->conditions($conditions);
         call_user_func_array(array($route, 'via'), $methods);
+        if(count($middleware) > 0) {
+            $route->setMiddleware($middleware);
+        }
     }
 
     /**
@@ -172,7 +176,8 @@ class RouteLoaderMiddleware extends \Slim\Middleware
         $route = $this->bag->getOrDefault('route', $config, '/');
         $methods = explode('|', strtoupper($this->bag->getOrDefault('methods', $config, 'GET')));
         $conditions = $this->bag->getOrDefault('conditions', $config, []);
-        $this->mapRoute($route, $name, $controller, $methods, $conditions);
+        $middleware = $this->bag->getOrDefault('middleware', $config, []);
+        $this->mapRoute($route, $name, $controller, $methods, $conditions, $middleware);
     }
 
     /**
@@ -212,4 +217,83 @@ class RouteLoaderMiddleware extends \Slim\Middleware
             return false;
         }
     }
+
+    /**
+     * Processes and returns a Slim Route digestable array for middleware
+     * 
+     * @param array $middleware
+     * @return array
+     * @throws \InvalidArgumentException
+     */
+    protected function prepareMiddleware(array $middleware)
+    {
+        if (count($middleware) === 0) {
+            return [];
+        }
+        $readyMw = [];
+        $app = $this->app;
+        foreach ($middleware as $name => $config) {
+            
+            $params = $this->bag->getOrDefault('params', $config, []);
+            if (array_key_exists('class', $config)) {
+                $controller = $config['class'];
+                if (strpos($controller, '::') !== false) {
+                    // Static
+                    if (!is_callable($controller)){
+                        throw new \Exception('Function ' . $controller . ' is not callable');
+                    }
+                    if (count($params) > 0) {
+                        $readyMw[] = call_user_func_array($controller, $params);
+                    } else {
+                        $readyMw[] = $controller;
+                    }
+                } elseif (strpos($controller, ':') !== false) {
+                    // Regular method
+                    $cparams = explode(":", $controller);
+                     if (!is_callable([(new $cparams[0]), $cparams[1]])){
+                        throw new \Exception('Function ' . $controller . ' is not callable');
+                    }
+                    if (count($params) > 0) {
+                        $readyMw[] = call_user_func_array([(new $cparams[0]), $cparams[1]], $params);
+                    } else {
+                        $readyMw[] = [(new $cparams[0]), $cparams[1]];
+                    }
+                } else {
+                    throw new \InvalidArgumentException(
+                    'Controller ' . $controller . ' does not have a valid action; :: or : are '
+                    . 'required to delimit the method'
+                    );
+                }
+                continue;
+            }
+            if (array_key_exists('closure', $config)) {
+                global $$config['closure'];
+                if (!is_callable($$config['closure'])){
+                    throw new \Exception('Function ' . $config['closure'] . ' is not callable');
+                }
+                if (count($params) > 0) {
+                    $readyMw[] = call_user_func_array($$config['closure'], $params);
+                } else {
+                    $readyMw[] = $$config['closure'];
+                }
+                continue;
+            }
+            
+            if (array_key_exists('function', $config)) {
+                if (!is_callable($config['function'])){
+                    throw new \Exception('Function ' . $config['function'] . ' is not callable');
+                }
+                if (count($params) > 0) {
+                    $readyMw[] = call_user_func_array($config['function'], $params);
+                } else {
+                    $readyMw[] = $config['function'];
+                }
+                continue;
+            }
+            
+            throw new \InvalidArgumentException('Middleware configuration lacking callable');
+        }
+        return $readyMw;
+    }
+
 }

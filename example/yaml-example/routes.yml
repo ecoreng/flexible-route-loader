@@ -3,6 +3,28 @@ routes:
         controller:  \ExampleCo\Example\ExampleController:testAction
         route: /test
         methods: GET
+        middleware:
+            authentication:
+                class: \ExampleCo\Example\ExampleRouteMiddleware:a12n
+                params:
+                    test1: 1
+                    test2: 2
+            authorization:
+                closure: closureMiddleware
+                params:
+                    test3: 3
+                    test4: 4
+            other:
+                function: test
+                params:
+                    test7: 7
+                    test8: 8
+            other2:
+                class: \ExampleCo\Example\ExampleRouteMiddleware::other
+                params:
+                    test5: 5
+                    test6: 6
+            
 
 groups:
     api:

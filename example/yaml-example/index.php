@@ -1,10 +1,32 @@
 <?php
+// Route Middleware as Closure
+$closureMiddleware = function ($test3, $test4) {
+    return function ($route) use ($test3, $test4) {
+        echo '<br>Route Middleware in action: closureMiddleware { <br>';
+        echo '&nbsp;&nbsp;analizing route: ' . $route->getName() . '<br>';
+        echo '&nbsp;&nbsp;$test3: ' . $test3 . '<br>';
+        echo '&nbsp;&nbsp;$test4: ' . $test4 . '<br>';
+        echo '}<br>';
+    };
+};
+
+// Route Middleware as Function
+function test ($test7, $test8) {
+    return function ($route) use ($test7, $test8) {
+        echo '<br>Route Middleware in action: test (function) { <br>';
+        echo '&nbsp;&nbsp;analizing route: ' . $route->getName() . '<br>';
+        echo '&nbsp;&nbsp;$test7: ' . $test7 . '<br>';
+        echo '&nbsp;&nbsp;$test8: ' . $test8 . '<br>';
+        echo '}<br>';
+    };
+}
 
 // Autoloader from composer
 require_once('../../vendor/autoload.php');
 
-// require our controller (use an autoloader in the real setup)
+// require our controller and route middleware (use an autoloader in the real setup)
 require_once('ExampleController.php');
+require_once('ExampleRouteMiddleware.php');
 
 // Use our RouteLoader and Bag
 use ecoreng\Route\RouteConfigBag as RouteBag;
