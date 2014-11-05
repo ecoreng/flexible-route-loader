@@ -11,7 +11,7 @@
          bootstrap="tests/bootstrap.php"
 >
   <testsuites>
-    <testsuite name="Flexible Service Provider Test Suite">
+    <testsuite name="Flexible Route Loader Test Suite">
       <directory suffix="Test.php">tests/ecoreng</directory>
     </testsuite>
   </testsuites>

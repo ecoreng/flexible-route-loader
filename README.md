@@ -8,7 +8,7 @@ Notice that this is NOT a ROUTER, this just loads routes into the default Slim r
 
 It gives you the flexibility to configure your routes using an array. It supports
 Groups, Named Routes, Multiple or Single Http methods and conditions. At the moment
-it'ss only possible to route using "Controller" classes, not anonymous functions.
+it's only possible to route using "Controller" classes, not anonymous functions.
 
 
 ## Why is this useful? ##
