@@ -1,5 +1,5 @@
 {
-    "name": "ecoreng/flexible-route-loader-middleware",
+    "name": "ecoreng/flexible-route-loader",
     "license": "MIT",
     "type": "library",
     "description": "Array Configurable Flexible Route Loader for Slim",

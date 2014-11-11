@@ -18,17 +18,5 @@ if ($vendorPos !== false) {
 
 $loader->setPsr4('ecoreng\\Test\\', __DIR__ . '/ecoreng/');
 
-require('ecoreng/Route/GenericMiddleware.php');
-
-
-// Define some generic middleware
-$closureWithParams = function ($param4) {
-    return function ($route) use ($param4) {
-        
-    };
-};
-$closureNoParams = function ($route) {
-    
-};
 
 return $loader;

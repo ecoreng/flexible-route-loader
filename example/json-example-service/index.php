@@ -8,15 +8,8 @@ $closureMiddleware = function ($route) {
 require_once('middleware.php');
 
 // Autoloader from composer
-require_once('../../vendor/autoload.php');
-
-// require our controller and route middleware (use an autoloader in the real setup)
-require_once('ExampleController.php');
-require_once('ExampleRouteMiddleware.php');
-
-// Use our RouteLoader and Bag
-use ecoreng\Route\RouteConfigBag as RouteBag;
-use ecoreng\Route\RouteLoaderMiddleware as RouteLoader;
+$autoloader = require_once('../../vendor/autoload.php');
+$autoloader->addPsr4('ExampleCo\\Example\\', dirname(__FILE__) . DIRECTORY_SEPARATOR);
 
 // Instantiation of slim
 $slimConfig = ['debug' => true];
@@ -27,14 +20,19 @@ $app = new \Slim\Slim($slimConfig);   // Slim 2.*
 $jsonContent = file_get_contents('routes.json');
 $config = json_decode($jsonContent, true);
 
-// Instantiate a new RouteConfigBag [this holds and validates our route config until it's time to load]
-$bag = new RouteBag;
-// Set groups and routes in the bag
-$bag->setRouteConfig($config['routes']);
-$bag->setGroupConfig($config['groups']);
+// Slim 2.*
+$app->container->singleton('RouteLoader', function () use ($app) {
+    return new \ecoreng\Route\Loader($app);
+});
 
-// Add the RouteLoaderMiddleware to Slim with the previously set up bag as a dependency in the constructor
-$app->add(new RouteLoader($bag));
+// Slim 3.*
+// $app['RouteLoader'] = function (\Pimple\Container $c) {
+//      return new RouteLoader($c);
+// };
+
+// add groups and routes
+$app->RouteLoader->addRoutes($config['routes']);
+$app->RouteLoader->addGroups($config['groups']);
 
 // Define the generic landing page with links (optional)
 $app->get('/', function () use ($jsonContent) {

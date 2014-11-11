@@ -2,14 +2,14 @@
 
 namespace ecoreng\Test\Route;
 
-class RouteConfigBagTest extends \PHPUnit_Framework_TestCase
+class LoaderTest extends \PHPUnit_Framework_TestCase
 {
-
-    protected $bag;
 
     public function setUp()
     {
-        $this->bag = new \ecoreng\Route\RouteConfigBag;
+        $appClassName = class_exists('\\Slim\\App') ? '\\Slim\\App' : '\\Slim\\Slim';
+        $this->app = new $appClassName;
+        $this->loader = new \ecoreng\Route\Loader($this->app);
 
         $this->invalidNotMultidimensional = ['test', 'test2'];
 
@@ -26,8 +26,8 @@ class RouteConfigBagTest extends \PHPUnit_Framework_TestCase
             ],
             'test2' => [
                 'controller' => '\\Example\\Controller\\ExampleController2:action2',
-                'route' => '/sample-route/:placeholder1/:placeholder2',
-                'methods' => 'GET|POST',
+                'route' => '/sample-route2/:placeholder1/:placeholder2',
+                'methods' => 'GET',
                 'conditions' => [
                     'placeholder1' => '(19|20)\d\d',
                     'placeholder2' => '(20)\d\d',
@@ -206,39 +206,33 @@ class RouteConfigBagTest extends \PHPUnit_Framework_TestCase
     public function testSetRouteConfigValid()
     {
 
-        $this->bag->setRouteConfig($this->validRouteConfig);
-        $returningRouteConfig = $this->bag->getRouteConfig();
+        $this->loader->addRoutes($this->validRouteConfig);
 
-        $this->assertArrayHasKey('test', $returningRouteConfig);
-        $this->assertArrayHasKey('test2', $returningRouteConfig);
+        $test = $this->app->router->getNamedRoute('test');
+        $test2 = $this->app->router->getNamedRoute('test2');
 
-        $this->assertArrayHasKey('controller', $returningRouteConfig['test']);
-        $this->assertArrayHasKey('route', $returningRouteConfig['test']);
-        $this->assertArrayHasKey('methods', $returningRouteConfig['test']);
-        $this->assertArrayHasKey('conditions', $returningRouteConfig['test']);
+        $this->assertEquals('/sample-route/:placeholder1/:placeholder2', $test->getPattern());
+        $this->assertEquals('/sample-route2/:placeholder1/:placeholder2', $test2->getPattern());
 
-        $this->assertEquals($this->validRouteConfig['test']['controller'], $returningRouteConfig['test']['controller']);
-        $this->assertEquals($this->validRouteConfig['test']['route'], $returningRouteConfig['test']['route']);
-        $this->assertEquals($this->validRouteConfig['test']['methods'], $returningRouteConfig['test']['methods']);
-        $this->assertEquals(true, is_array($returningRouteConfig['test']['conditions']));
+        $this->assertEquals(true, in_array('GET', $test->getHttpMethods()));
+        $this->assertEquals(true, in_array('POST', $test->getHttpMethods()));
+        $this->assertEquals(true, in_array('GET', $test2->getHttpMethods()));
 
-        $this->assertArrayHasKey('placeholder1', $returningRouteConfig['test']['conditions']);
-        $this->assertArrayHasKey('placeholder2', $returningRouteConfig['test']['conditions']);
+        $this->assertEquals(true, array_key_exists('placeholder1', $test->getConditions()));
+        $this->assertEquals(true, array_key_exists('placeholder2', $test->getConditions()));
+        $this->assertEquals('(19|20)\d\d', $test->getConditions()['placeholder1']);
+        $this->assertEquals('(20)\d\d', $test->getConditions()['placeholder2']);
 
-        $this->assertEquals(
-            $this->validRouteConfig['test']['conditions']['placeholder1'],
-            $returningRouteConfig['test']['conditions']['placeholder1']
-        );
-        $this->assertEquals(
-            $this->validRouteConfig['test']['conditions']['placeholder2'],
-            $returningRouteConfig['test']['conditions']['placeholder2']
-        );
+        $this->assertEquals(true, array_key_exists('placeholder1', $test2->getConditions()));
+        $this->assertEquals(true, array_key_exists('placeholder2', $test2->getConditions()));
+        $this->assertEquals('(19|20)\d\d', $test2->getConditions()['placeholder1']);
+        $this->assertEquals('(20)\d\d', $test2->getConditions()['placeholder2']);
     }
 
     public function testInvalidRouteMultidimensional()
     {
         try {
-            $this->bag->setRouteConfig($this->invalidNotMultidimensional);
+            $this->loader->addRoutes($this->invalidNotMultidimensional);
         } catch (\Exception $e) {
             $this->assertInstanceOf('\\InvalidArgumentException', $e);
         }
@@ -247,7 +241,7 @@ class RouteConfigBagTest extends \PHPUnit_Framework_TestCase
     public function testInvalidMissingController()
     {
         try {
-            $this->bag->setRouteConfig($this->invalidRouteMissingController);
+            $this->loader->addRoutes($this->invalidRouteMissingController);
         } catch (\Exception $e) {
             $this->assertInstanceOf('\\InvalidArgumentException', $e);
         }
@@ -256,7 +250,7 @@ class RouteConfigBagTest extends \PHPUnit_Framework_TestCase
     public function testInvalidMissingRoute()
     {
         try {
-            $this->bag->setRouteConfig($this->invalidRouteMissingRoute);
+            $this->loader->addRoutes($this->invalidRouteMissingRoute);
         } catch (\Exception $e) {
             $this->assertInstanceOf('\\InvalidArgumentException', $e);
         }
@@ -264,58 +258,42 @@ class RouteConfigBagTest extends \PHPUnit_Framework_TestCase
 
     public function testSetGroupConfigValid()
     {
+        $this->loader->addGroups($this->validGroupConfig);
 
-        $this->bag->setGroupConfig($this->validGroupConfig);
-        $returningGroupConfig = $this->bag->getGroupConfig();
+        $test1 = $this->app->router->getNamedRoute('api_test1');
+        $test2 = $this->app->router->getNamedRoute('api_test2_test_sub');
+        $test3 = $this->app->router->getNamedRoute('api2_test12');
 
-        $this->assertArrayHasKey('api', $returningGroupConfig);
-        $this->assertArrayHasKey('api2', $returningGroupConfig);
+        $this->assertEquals('/api/test', $test1->getPattern());
+        $this->assertEquals('/api/test2/sub', $test2->getPattern());
+        $this->assertEquals('/api2/test2', $test3->getPattern());
 
-        $this->assertArrayHasKey('group', $returningGroupConfig['api']);
-        $this->assertArrayHasKey('route', $returningGroupConfig['api']);
+        $this->assertEquals(true, in_array('GET', $test1->getHttpMethods()));
+        $this->assertEquals(true, in_array('POST', $test1->getHttpMethods()));
+        $this->assertEquals(true, in_array('POST', $test2->getHttpMethods()));
+        $this->assertEquals(true, in_array('GET', $test3->getHttpMethods()));
+        $this->assertEquals(true, in_array('POST', $test3->getHttpMethods()));
 
-        $this->assertEquals($this->validGroupConfig['api']['route'], $returningGroupConfig['api']['route']);
-        $this->assertEquals(true, is_array($returningGroupConfig['api']['group']));
-
-        $this->assertArrayHasKey('test1', $returningGroupConfig['api']['group']);
-        $this->assertArrayHasKey('test2', $returningGroupConfig['api']['group']);
-
-        $this->assertArrayHasKey('methods', $returningGroupConfig['api']['group']['test1']);
-        $this->assertArrayHasKey('route', $returningGroupConfig['api']['group']['test1']);
-        $this->assertArrayHasKey('controller', $returningGroupConfig['api']['group']['test1']);
-        $this->assertArrayHasKey('conditions', $returningGroupConfig['api']['group']['test1']);
-
-        $this->assertEquals(
-            $this->validGroupConfig['api']['group']['test1']['methods'],
-            $returningGroupConfig['api']['group']['test1']['methods']
-        );
-        $this->assertEquals(
-            $this->validGroupConfig['api']['group']['test1']['route'],
-            $returningGroupConfig['api']['group']['test1']['route']
-        );
-        $this->assertEquals(
-            $this->validGroupConfig['api']['group']['test1']['controller'],
-            $returningGroupConfig['api']['group']['test1']['controller']
-        );
-        $this->assertEquals(true, is_array($returningGroupConfig['api']['group']['test1']['conditions']));
-
-        $this->assertArrayHasKey('placeholder1', $returningGroupConfig['api']['group']['test1']['conditions']);
-        $this->assertArrayHasKey('placeholder2', $returningGroupConfig['api']['group']['test1']['conditions']);
-
-        $this->assertEquals(
-            $this->validGroupConfig['api']['group']['test1']['conditions']['placeholder1'],
-            $returningGroupConfig['api']['group']['test1']['conditions']['placeholder1']
-        );
-        $this->assertEquals(
-            $this->validGroupConfig['api']['group']['test1']['conditions']['placeholder2'],
-            $returningGroupConfig['api']['group']['test1']['conditions']['placeholder2']
-        );
+        $this->assertEquals(true, array_key_exists('placeholder1', $test1->getConditions()));
+        $this->assertEquals(true, array_key_exists('placeholder2', $test1->getConditions()));
+        $this->assertEquals('(19|20)\d\d', $test1->getConditions()['placeholder1']);
+        $this->assertEquals('(20)\d\d', $test1->getConditions()['placeholder2']);
+        
+        $this->assertEquals(true, array_key_exists('placeholder1', $test2->getConditions()));
+        $this->assertEquals(true, array_key_exists('placeholder2', $test2->getConditions()));
+        $this->assertEquals('(20)\d\d', $test2->getConditions()['placeholder1']);
+        $this->assertEquals('(19|20)\d\d', $test2->getConditions()['placeholder2']);
+        
+        $this->assertEquals(true, array_key_exists('placeholder1', $test3->getConditions()));
+        $this->assertEquals(true, array_key_exists('placeholder2', $test3->getConditions()));
+        $this->assertEquals('(19|20)\d\d', $test3->getConditions()['placeholder1']);
+        $this->assertEquals('(20)\d\d', $test3->getConditions()['placeholder2']);
     }
 
     public function testInvalidGroupMultidimensional()
     {
         try {
-            $this->bag->setGroupConfig($this->invalidNotMultidimensional);
+            $this->loader->addGroups($this->invalidNotMultidimensional);
         } catch (\Exception $e) {
             $this->assertInstanceOf('\\InvalidArgumentException', $e);
         }
@@ -324,7 +302,7 @@ class RouteConfigBagTest extends \PHPUnit_Framework_TestCase
     public function testInvalidGroupMissingControllerDeep()
     {
         try {
-            $this->bag->setGroupConfig($this->invalidGroupMissingControllerDeep);
+            $this->loader->addGroups($this->invalidGroupMissingControllerDeep);
         } catch (\Exception $e) {
             $this->assertInstanceOf('\\InvalidArgumentException', $e);
         }
@@ -333,7 +311,7 @@ class RouteConfigBagTest extends \PHPUnit_Framework_TestCase
     public function testInvalidGroupMissingController()
     {
         try {
-            $this->bag->setGroupConfig($this->invalidGroupMissingController);
+            $this->loader->addGroups($this->invalidGroupMissingController);
         } catch (\Exception $e) {
             $this->assertInstanceOf('\\InvalidArgumentException', $e);
         }
@@ -342,7 +320,7 @@ class RouteConfigBagTest extends \PHPUnit_Framework_TestCase
     public function testInvalidGroupMissingRoute()
     {
         try {
-            $this->bag->setGroupConfig($this->invalidGroupMissingRoute);
+            $this->loader->addGroups($this->invalidGroupMissingRoute);
         } catch (\Exception $e) {
             $this->assertInstanceOf('\\InvalidArgumentException', $e);
         }
@@ -351,7 +329,7 @@ class RouteConfigBagTest extends \PHPUnit_Framework_TestCase
     public function testInvalidGroupMissingGroupAndController()
     {
         try {
-            $this->bag->setGroupConfig($this->invalidGroupMissingGroupAndController);
+            $this->loader->addGroups($this->invalidGroupMissingGroupAndController);
         } catch (\Exception $e) {
             $this->assertInstanceOf('\\InvalidArgumentException', $e);
         }
@@ -359,14 +337,14 @@ class RouteConfigBagTest extends \PHPUnit_Framework_TestCase
 
     public function testSetNicknamesValid()
     {
-        $this->bag->setNicknames($this->validNicknamesConfig);
-        $returningNicknamesConfig = $this->bag->getNicknames();
+        $this->loader->addNicknames($this->validNicknamesConfig);
+        $returningNicknamesConfig = $this->loader->getNicknames();
     }
 
     public function testInvalidNicknamesMultidimensional()
     {
         try {
-            $this->bag->setNicknames($this->invalidNicknamesMultidimensional);
+            $this->loader->addNicknames($this->invalidNicknamesMultidimensional);
         } catch (\Exception $e) {
             $this->assertInstanceOf('\\InvalidArgumentException', $e);
         }
@@ -375,7 +353,7 @@ class RouteConfigBagTest extends \PHPUnit_Framework_TestCase
     public function testInvalidNicknamesEmptyReplacement()
     {
         try {
-            $this->bag->setNicknames($this->invalidNicknamesEmptyReplacement);
+            $this->loader->addNicknames($this->invalidNicknamesEmptyReplacement);
         } catch (\Exception $e) {
             $this->assertInstanceOf('\\InvalidArgumentException', $e);
         }
@@ -384,7 +362,7 @@ class RouteConfigBagTest extends \PHPUnit_Framework_TestCase
     public function testInvalidNicknamesNotAssocArray()
     {
         try {
-            $this->bag->setNicknames($this->invalidNicknamesNotAssocArray);
+            $this->loader->addNicknames($this->invalidNicknamesNotAssocArray);
         } catch (\Exception $e) {
             $this->assertInstanceOf('\\InvalidArgumentException', $e);
         }
