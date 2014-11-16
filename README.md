@@ -1,6 +1,6 @@
 Flexible Route Loader
 =======================
-[![Build Status](https://travis-ci.org/ecoreng/FlexibleRouteLoader.svg)](https://travis-ci.org/ecoreng/FlexibleRouteLoader) [![SensioLabsInsight](https://insight.sensiolabs.com/projects/0f7d4aa7-f480-46dc-b9dc-a6191bfab8f5/mini.png)](https://insight.sensiolabs.com/projects/0f7d4aa7-f480-46dc-b9dc-a6191bfab8f5)
+[![Build Status](https://travis-ci.org/ecoreng/flexible-route-loader.svg?branch=master)](https://travis-ci.org/ecoreng/flexible-route-loader) [![SensioLabsInsight](https://insight.sensiolabs.com/projects/0f7d4aa7-f480-46dc-b9dc-a6191bfab8f5/mini.png)](https://insight.sensiolabs.com/projects/0f7d4aa7-f480-46dc-b9dc-a6191bfab8f5)
 
 A route loader for Slim.
 
