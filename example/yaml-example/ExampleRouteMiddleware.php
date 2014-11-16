@@ -12,7 +12,8 @@ class ExampleRouteMiddleware
 
     public function a12n($test1, $test2)
     {
-        return function ($route) use ($test1, $test2) {
+        // For Slim 3.* you should typehint for \Slim\Interfaces\RouteInterface
+        return function (\Slim\Route $route) use ($test1, $test2) {
             echo '<br><br>Route Middleware in action: a12n { <br>';
             echo '&nbsp;&nbsp;analizing route: ' . $route->getName() . '<br>';
             echo '&nbsp;&nbsp;$test1: ' . $test1 . '<br>';
@@ -23,7 +24,8 @@ class ExampleRouteMiddleware
 
     public static function other($test5, $test6)
     {
-        return function ($route) use ($test5, $test6) {
+        // For Slim 3.* you should typehint for \Slim\Interfaces\RouteInterface
+        return function (\Slim\Route $route) use ($test5, $test6) {
             echo '<br>Route Middleware in action: other { <br>';
             echo '&nbsp;&nbsp;analizing route: ' . $route->getName() . '<br>';
             echo '&nbsp;&nbsp;$test5: ' . $test5 . '<br>';
