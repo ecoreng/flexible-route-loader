@@ -8,7 +8,7 @@ class Loader
     protected $app;
     protected $slimApi = 2;
     protected $nicknames;
-    
+
     public function __construct($app)
     {
         $appClassName = class_exists('\\Slim\\App') ? '\\Slim\\App' : '\\Slim\\Slim';
@@ -57,7 +57,7 @@ class Loader
     {
         return $this->nicknames;
     }
-    
+
     /**
      * Gets $key from $haystack if it exists, otherwise return $default
      *
@@ -79,7 +79,7 @@ class Loader
             $this->{$config} = array_merge($newConfig, $this->{$config});
         }
     }
-    
+
     /**
      * Map a single route to $app using the specified parameters
      *
@@ -173,69 +173,43 @@ class Loader
             return [];
         }
         $readyMw = [];
-        $app = $this->app;
         foreach ($middleware as $name => $config) {
 
             $params = $this->getOrDefault('params', $config, []);
-            if (array_key_exists('class', $config)) {
-                $controller = $config['class'];
-                if (strpos($controller, '::') !== false) {
-                    // Static
-                    if (!is_callable($controller)) {
-                        throw new \Exception('Function ' . $controller . ' is not callable');
-                    }
-                    if (count($params) > 0) {
-                        $readyMw[] = call_user_func_array($controller, $params);
-                    } else {
-                        $readyMw[] = $controller;
-                    }
-                } elseif (strpos($controller, ':') !== false) {
-                    // Regular method
-                    $cparams = explode(":", $controller);
-                    if (!is_callable([new $cparams[0], $cparams[1]])) {
-                        throw new \Exception('Function ' . $controller . ' is not callable');
-                    }
-                    if (count($params) > 0) {
-                        $readyMw[] = call_user_func_array([new $cparams[0], $cparams[1]], $params);
-                    } else {
-                        $readyMw[] = [(new $cparams[0]), $cparams[1]];
-                    }
+            if (is_array($config)) {
+                if (array_key_exists('class', $config)) {
+                    $class = $config['class'];
+                    $readyMw[] = $this->getCallableFromString($class, $params);
+                    continue;
                 } else {
-                    throw new \InvalidArgumentException(
-                        'Controller ' . $controller . ' does not have a valid action; :: or : are '
-                        . 'required to delimit the method'
-                    );
+                    throw new \InvalidArgumentException('Middleware configuration lacking callable');
                 }
-                continue;
+            } else {
+                $readyMw[] = $this->getCallableFromString($config);
             }
-            if (array_key_exists('closure', $config)) {
-                global $$config['closure'];
-                if (!is_callable($$config['closure'])) {
-                    throw new \Exception('Function ' . $config['closure'] . ' is not callable');
-                }
-                if (count($params) > 0) {
-                    $readyMw[] = call_user_func_array($$config['closure'], $params);
-                } else {
-                    $readyMw[] = $$config['closure'];
-                }
-                continue;
-            }
-
-            if (array_key_exists('function', $config)) {
-                if (!is_callable($config['function'])) {
-                    throw new \Exception('Function ' . $config['function'] . ' is not callable');
-                }
-                if (count($params) > 0) {
-                    $readyMw[] = call_user_func_array($config['function'], $params);
-                } else {
-                    $readyMw[] = $config['function'];
-                }
-                continue;
-            }
-
-            throw new \InvalidArgumentException('Middleware configuration lacking callable');
         }
         return $readyMw;
+    }
+
+    protected function getCallableFromString($class, $params)
+    {
+        $delimiter = strpos($class, '::') !== false ? '::' : ':';
+        $cparams = explode($delimiter, $class);
+        if (count($cparams) < 2) {
+            throw new \InvalidArgumentException(
+                'Class ' . $class . ' does not have a valid action; :: or : are '
+                . 'required to delimit the method'
+            );
+        }
+        if (count($params) > 0) {
+            return call_user_func_array([$cparams[0], $cparams[1]], $params);
+        } else {
+            if ($delimiter === ':') {
+                return [$cparams[0], $cparams[1]];
+            } else {
+                return $class;
+            }
+        }
     }
 
     /**

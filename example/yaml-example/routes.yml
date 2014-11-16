@@ -9,16 +9,6 @@ routes:
                 params:
                     test1: 1
                     test2: 2
-            authorization:
-                closure: closureMiddleware
-                params:
-                    test3: 3
-                    test4: 4
-            other:
-                function: test
-                params:
-                    test7: 7
-                    test8: 8
             other2:
                 class: \ExampleCo\Example\ExampleRouteMiddleware::other
                 params:

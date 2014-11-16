@@ -5,6 +5,11 @@ namespace ExampleCo\Example;
 class ExampleRouteMiddleware
 {
 
+    public function __construct()
+    {
+        echo 'ExampleRouteMiddleware instantiated (should not happen)';
+    }
+
     public function a12n($test1, $test2)
     {
         return function ($route) use ($test1, $test2) {
@@ -15,7 +20,7 @@ class ExampleRouteMiddleware
             echo '}<br>';
         };
     }
-    
+
     public static function other($test5, $test6)
     {
         return function ($route) use ($test5, $test6) {

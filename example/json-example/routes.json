@@ -8,12 +8,6 @@
                 "authentication": {
                     "class": "\\ExampleCo\\Example\\ExampleRouteMiddleware:a12n"
                 },
-                "authorization": {
-                    "closure": "closureMiddleware"
-                },
-                "other": {
-                    "function": "test"
-                },
                 "other2":{
                     "class": "\\ExampleCo\\Example\\ExampleRouteMiddleware::other"
                 }

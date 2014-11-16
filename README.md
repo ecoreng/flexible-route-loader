@@ -104,8 +104,8 @@ $app->run();
 ## Examples ##
 Be sure to check out the example:
 
-- Read a full example using a Json File @ ``example\json-example-service\index.php``;
-- Also check the archived example where it shows you how to use route middleware with more parameters
+- Read a full example using a Json File @ ``example\json-example\index.php``;
+- Read a full example using a Yaml File @ ``example\yaml-example\index.php``;
 
 ## Contribute ##
 Pull Requests welcome, add some tests if necessary and adhere to PSR-2 coding style.
