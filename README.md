@@ -102,7 +102,7 @@ $app->run();
 - Add tests for middleware
 
 ## Examples ##
-Be sure to check out the example:
+Be sure to check out the examples:
 
 - Read a full example using a Json File @ ``example\json-example\index.php``;
 - Read a full example using a Yaml File @ ``example\yaml-example\index.php``;
